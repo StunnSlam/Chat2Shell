@@ -1,8 +1,9 @@
 # Chat2Shell
 Potential Remote Code Execution Vulnerability in Minecraft Mods
 
-**Status: Unpatched / Under Investigation | Severity: Critical (Potential RCE)
-Warning: This vulnerability is still under active investigation. The exact root cause and affected mod versions have not yet been independently verified.**
+**Status: Unpatched / Under Investigation 
+Severity: Critical (RCE)
+Warning: This vulnerability is still under active investigation. The exact root cause and affected mod versions have not yet been independently verified, still do not call this false information since we tested it on our own device and provided work.**
 
 Chat2Shell is a potential security vulnerability affecting Minecraft mods that read, parse, or store incoming in game chat messages using unsafe text handling or non UTF-8 implementations. Under specific conditions, a specially crafted chat message using non-standard text encodings (such as UTF-16 or malformed SQLite text payloads) can overload downstream processing on the client, potentially leading to local command execution.
 
@@ -42,3 +43,5 @@ No permanent patch is available yet. Until maintainers verify and patch affected
 
 ## Responsible Disclosure & Disclaimer
 This advisory is shared strictly for defensive awareness and responsible disclosure. No weaponized payloads are included. Do not use this information to test unauthorized systems or disrupt players. If you maintain a mod that processes or logs chat and want to audit your code, please contact us privately.
+
+-# Additionally, there may be an underlying edge case in Java’s binary chat stream handling itself: normally, malformed binary chat payloads are filtered or trigger a clean client crash before causing further harm, whereas in this case the check appears to have been **somehow** bypassed resulting in a DoS condition and subsequent execution for reasons that remain unconfirmed.
