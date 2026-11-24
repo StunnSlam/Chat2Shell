@@ -14,12 +14,15 @@ In preliminary testing, the behavior was reproduced under the following setup:
 ## Technical Background
 The flaw lies in mod level chat parsing or reading. While standard Minecraft chat uses UTF-8-compatible serialization, the tested payload abuses non-UTF-8/UTF-16 Symbols representations passed into SQLite or native text parsers. During testing, unexpected local process execution occurred roughly 10 seconds after the message was received, suggesting asynchronous queue flushing or buffer handling issues.
 
+## Exploit Mechanism & PoC Policy
+For security reasons, no public Proof of Concept or functional exploit payload will be released until affected mods are patched. At a high level, the attack works as follows: an attacker sends a chat message containing a malicious payload padded or interleaved with 256 bit to 4096 bit blocks of non UTF-8 compatible UTF-16 symbols. When a vulnerable mod attempts to parse or store these oversized, incompatible character sequences and used outdated chat reading methods, it overloads the text processing or handling routine, triggering a Denial of Service condition that subsequently leads to unintended execution of the embedded payload.
+
 ## Examples of Mod Architectures to Audit
 Any mod that intercepts, logs, or synchronizes chat packets between client and server—especially those writing chat history to local SQLite databases—should be reviewed. Examples of mods that implement client/server chat reading, formatting, or SQLite logging patterns include:
 • Client/Server Chat Processors: Mods like Beautified Chat (which has paired client and server variants for parsing and formatting chat).
 • UTF-16 Chat & Event Loggers: Mods that store chat or server logs in databases, such as Chat Logs (experimental mode), ChatTracker, or server/client loggers like Tempora and GriefLogger.
 
-**(Note: Listing these mods does not mean they are confirmed vulnerable—they represent the type of chat-reading and SQLite-logging functionality relevant to this investigation.)**
+**(Note: Listing these mods does not mean they are confirmed vulnerable, they represent the type of chat reading and UTF16 logging functionality relevant to this investigation.)**
 
 ## Mitigations & Temporary Precautions
 No permanent patch is available yet. Until maintainers verify and patch affected codebases:
