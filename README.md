@@ -16,7 +16,11 @@ In preliminary testing, the behavior was reproduced under the following setup:
 The flaw lies in mod level chat parsing or reading. While standard Minecraft chat uses UTF-8-compatible serialization, the tested payload abuses non-UTF-8/UTF-16 Symbols representations passed into SQLite or native text parsers. During testing, unexpected local process execution occurred roughly 10 seconds after the message was received, suggesting asynchronous queue flushing or buffer handling issues.
 
 ## Exploit Mechanism & PoC Policy
-For security reasons, no Codeor functional exploit payload will be released until affected mods are patched or more information gotten At a high level, the attack works as follows: an attacker sends a chat message containing a malicious payload padded or interleaved with 4096 bit blocks of non UTF-8 compatible UTF-16 symbols. When a vulnerable mod attempts to parse or store these oversized, incompatible character sequences and used outdated chat reading methods, it overloads the text processing or handling routine, triggering a Denial of Service condition that subsequently leads to unintended execution of the embedded payload.
+For security reasons, no Code or functional exploit payload will be released until affected mods are patched or more information gotten At a high level, the attack works as follows: 
+
+1. Crafted Input: An attacker sends a chat message containing Java code interspersed with UTF-16 symbol blocks to overload standard text parsing.
+2. Overload: When a mod with outdated chat reading or logging logic processes the message, the mixed representation causes text handling to stall or overload, triggering a DoS state.
+3. Runtime Execution: Under this overloaded state, the client's chat handling path running inside Minecraft's own Java Runtime Environment allegedly fails to cleanly reject or isolate the input and instead passes it toward an execution sink, resulting in unintended local execution.
 
 ## Discovery & Authenticity
 This finding is not a fake report or recycled public exploit, though independent verification is still ongoing. It was first noticed during live play on a Minecraft server when myanti-exploit/anti-cheat check flagged unusual activity on a mod. Decompiling the mod revealed outdated Java chat reading routines that interact poorly with malformed text and overload behavior, leading to further analysis of how a DoS condition and legacy functions can chain into active RCE. Because reverse engineering and testing were done privately by a small research group, full independent confirmation and patch testing are still in progress.
@@ -25,6 +29,7 @@ This finding is not a fake report or recycled public exploit, though independent
 Any mod that intercepts, logs, or synchronizes chat packets between client and server—especially those writing chat history to local SQLite databases—should be reviewed. Examples of mods that implement client/server chat reading, formatting, or SQLite logging patterns include:
 • Client/Server Chat Processors: Mods like Beautified Chat (which has paired client and server variants for parsing and formatting chat).
 • UTF-16 Chat & Event Loggers: Mods that store chat or server logs in databases, such as Chat Logs experimental mode, ChatTracker, or server/client loggers like Tempora and GriefLogger.
+_Additionally, there may be an underlying edge case in Java’s binary chat stream handling itself: normally, malformed binary chat payloads are filtered or trigger a clean client crash before causing further harm, whereas in this case the check appears to have been **somehow** bypassed resulting in a DoS condition and subsequent execution for reasons that remain unconfirmed._
 
 **(Note: Listing these mods does not mean they are confirmed vulnerable, they represent the type of chat reading and UTF16 logging functionality relevant to this investigation.)**
 
@@ -43,5 +48,3 @@ No permanent patch is available yet. Until maintainers verify and patch affected
 
 ## Responsible Disclosure & Disclaimer
 This advisory is shared strictly for defensive awareness and responsible disclosure. No weaponized payloads are included. Do not use this information to test unauthorized systems or disrupt players. If you maintain a mod that processes or logs chat and want to audit your code, please contact us privately.
-
-_Additionally, there may be an underlying edge case in Java’s binary chat stream handling itself: normally, malformed binary chat payloads are filtered or trigger a clean client crash before causing further harm, whereas in this case the check appears to have been **somehow** bypassed resulting in a DoS condition and subsequent execution for reasons that remain unconfirmed._
