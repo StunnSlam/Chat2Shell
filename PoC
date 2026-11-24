@@ -1,0 +1,6 @@
+
+Conceptual PoC.
+
+1. Crafted Chat Input: An attacker sends a chat message containing Java code interspersed with UTF-16 symbol blocks to overload standard text parsing.
+2. Encoding & Overload: When a mod with outdated chat reading or logging logic processes the message, the mixed representation causes text handling to stall or overload, triggering a DoS state.
+3. Unintended Runtime Execution: Under this overloaded state, the client's chat handling path running inside Minecraft's own Java Runtime Environment (JRE) allegedly fails to cleanly reject or isolate the input and instead passes it toward an execution sink, resulting in unintended local execution.
