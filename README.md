@@ -17,6 +17,9 @@ The flaw lies in mod level chat parsing or reading. While standard Minecraft cha
 ## Exploit Mechanism & PoC Policy
 For security reasons, no public Proof of Concept or functional exploit payload will be released until affected mods are patched. At a high level, the attack works as follows: an attacker sends a chat message containing a malicious payload padded or interleaved with 4096 bit blocks of non UTF-8 compatible UTF-16 symbols. When a vulnerable mod attempts to parse or store these oversized, incompatible character sequences and used outdated chat reading methods, it overloads the text processing or handling routine, triggering a Denial of Service condition that subsequently leads to unintended execution of the embedded payload.
 
+## Discovery & Authenticity
+This finding is not a fake report or recycled public exploit, though independent verification is still ongoing. It was first noticed during live play on a Minecraft server when myanti-exploit/anti-cheat check flagged unusual activity on a mod. Decompiling the mod revealed outdated Java chat reading routines that interact poorly with malformed text and overload behavior, leading to further analysis of how a DoS condition and legacy functions can chain into active RCE. Because reverse engineering and testing were done privately by a small research group, full independent confirmation and patch testing are still in progress.
+
 ## Examples of Mod Architectures to Audit
 Any mod that intercepts, logs, or synchronizes chat packets between client and server—especially those writing chat history to local SQLite databases—should be reviewed. Examples of mods that implement client/server chat reading, formatting, or SQLite logging patterns include:
 • Client/Server Chat Processors: Mods like Beautified Chat (which has paired client and server variants for parsing and formatting chat).
