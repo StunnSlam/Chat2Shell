@@ -28,6 +28,7 @@ If the attacker used that example just with more than 4096 Bytes and a Client us
 
 ## Discovery & Authenticity
 This finding is not a fake report or recycled public exploit, though independent verification is still ongoing. It was first noticed during live play on a Minecraft server when myanti-exploit/anti-cheat check flagged unusual activity on a mod. Decompiling the mod revealed outdated Java chat reading routines that interact poorly with malformed text and overload behavior, leading to further analysis of how a DoS condition and legacy functions can chain into active RCE. Because reverse engineering and testing were done privately by a small research group, full independent confirmation and patch testing are still in progress.
+Even thought Vanilla Minecraft strictly limits standard chat packets to 256 Bit characters on both the client and server. These Vanilla server wont be affected in any case, but modified server that explicitly bypasses packet size limits and allow UTF-16 Symbols could be abused.
 
 ## Examples of Mod Architectures to Audit
 Any mod that intercepts, logs, or synchronizes chat packets between client and server—especially those writing chat history to local SQLite databases—should be reviewed. Examples of mods that implement client/server chat reading, formatting, or SQLite logging patterns include:
