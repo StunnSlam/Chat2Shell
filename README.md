@@ -18,9 +18,13 @@ The flaw lies in mod level chat parsing or reading. While standard Minecraft cha
 ## Exploit Mechanism & PoC Policy
 For security reasons, no Code or functional exploit payload will be released until affected mods are patched or more information gotten At a high level, the attack works as follows: 
 
-1. Crafted Input: An attacker sends a chat message containing Java code interspersed with UTF-16 symbol blocks to overload standard text parsing.
-2. Overload: When a mod with outdated chat reading or logging logic processes the message, the mixed representation causes text handling to stall or overload, triggering a DoS state.
+1. Crafted Input: An attacker sends a chat message containing compressed Java code interspersed with UTF-16 symbol blocks to overload standard text parsing.
+2. Overload: When a mod with outdated chat reading or logging logic processes the message, the mixed representation causes log storing to stall or overload, triggering a DoS state.
 3. Runtime Execution: Under this overloaded state, the client's chat handling path running inside Minecraft's own Java Runtime Environment allegedly fails to cleanly reject or isolate the input and instead passes it toward an execution sink, resulting in unintended local execution.
+_Additionally, there may be an underlying edge case in Java’s binary chat stream handling itself: normally, malformed binary chat payloads are filtered or trigger a clean client crash before causing further harm, whereas in this case the check appears to have been **somehow** bypassed resulting in a DoS condition and subsequent execution for reasons that remain unconfirmed._
+
+Example Chat Input: R□u□n□t□i□m□e□.□g□e□t□R□u□n□t□i□m□e□(□)□e□x□e□c□(□“□c□a□l□c□.□e□x□e□)□;□
+If the attacker used that example just with more than 4096 Bytes and a Client used outdated chat reading and stores that logs into a UTF-8 Database, it causes to overload.
 
 ## Discovery & Authenticity
 This finding is not a fake report or recycled public exploit, though independent verification is still ongoing. It was first noticed during live play on a Minecraft server when myanti-exploit/anti-cheat check flagged unusual activity on a mod. Decompiling the mod revealed outdated Java chat reading routines that interact poorly with malformed text and overload behavior, leading to further analysis of how a DoS condition and legacy functions can chain into active RCE. Because reverse engineering and testing were done privately by a small research group, full independent confirmation and patch testing are still in progress.
