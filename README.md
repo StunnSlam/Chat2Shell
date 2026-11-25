@@ -53,3 +53,7 @@ No permanent patch is available yet. Until maintainers verify and patch affected
 
 ## Responsible Disclosure & Disclaimer
 This advisory is shared strictly for defensive awareness and responsible disclosure. No weaponized payloads are included. Do not use this information to test unauthorized systems or disrupt players. If you maintain a mod that processes or logs chat and want to audit your code, please contact us privately.
+
+## FAQ
+You might ask how Java code stored in a database could ever turn into an RCE or touch the Java Runtime at all. Of course, storing corrupted Java code with UTF-16 bytes in a database won't execute code directly. That also means mods that only use Chat Loggings methods won't be affected. However, mods that actively modify the chat need to interact with the Java Runtime and store that data. Because of this, these mods, as well as non Vanilla servers, are most likely affected if they rely on the requirements above.
+
