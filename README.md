@@ -55,5 +55,14 @@ No permanent patch is available yet. Until maintainers verify and patch affected
 This advisory is shared strictly for defensive awareness and responsible disclosure. No weaponized payloads are included. Do not use this information to test unauthorized systems or disrupt players. If you maintain a mod that processes or logs chat and want to audit your code, please contact us privately.
 
 ## FAQ
-You might ask how Java code stored in a database could ever turn into an RCE or touch the Java Runtime at all. Of course, storing corrupted Java code with UTF-16 bytes in a database won't execute code directly. That also means mods that only use Chat Loggings methods won't be affected. However, mods that actively modify the chat need to interact with the Java Runtime and store that data. Because of this, these mods, as well as non Vanilla servers, are most likely affected if they rely on the requirements above.
+**Why is there no Proof of Concept code in this repository?**
+This vulnerability does not rely on a standalone script or external tool that can simply be uploaded and run. The trigger requires a specific combination of live server side packet manipulation (bypassing standard Vanilla size limits), specific clien mod configurations, and malformed UTF-16 byte sequences. Releasing the exact raw payload right now would immediately weaponize the bug against unpatched servers, which goes against responsible disclosure practices.
 
+**How can a simple chat message or database entry lead to Remote Code Execution ?**
+Storing corrupted text in a database does not execute Java code by itself. However, mods that actively parse, format, or synchronize chat packets pass these strings through legacy Java text-handling routines and native serialization layers. Under heavy buffer overload caused by oversized (>4096 bytes) mixed encoding payloads, flawed error handling fails to isolate the input, allowing the data to reach an active execution sink within the Minecraft Java Runtime.
+
+**People are calling this fake because they haven't seen it reproduced yet. How do we know it's real?**
+Independent verification takes time, especially when dealing with timing sensitive memory issues that depend on JVM behavior and specific hardware states. Skepticism is completely normal in security research until a CVE or official patch is published. We are currently working on a safe, non weaponized reproduction environment (a dummy mod) so maintainers can verify the crash and execution path locally without exposing real servers to risk.
+
+**What should mod developers or server owners do right now?**
+Even if you remain skeptical, enforcing strict UTF-8 validation and rejecting oversized chat packets (>256 characters) is basic defensive hygiene. If you maintain a mod that logs or modifies chat, audit your PreparedStatement usage and ensure malformed byte sequences are dropped immediately before hitting your parsing logic.
