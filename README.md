@@ -66,3 +66,5 @@ Independent verification takes time, especially when dealing with timing sensiti
 
 **What should mod developers or server owners do right now?**
 Even if you remain skeptical, enforcing strict UTF-8 validation and rejecting oversized chat packets (>256 characters) is basic defensive hygiene. If you maintain a mod that logs or modifies chat, audit your PreparedStatement usage and ensure malformed byte sequences are dropped immediately before hitting your parsing logic.
+
+_We know there’s very much Lack of Proof, we will update our report when we find more about the functionality_ 
